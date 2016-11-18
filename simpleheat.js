@@ -12,6 +12,8 @@ function simpleheat(canvas) {
     this._height = canvas.height;
 
     this._max = 1;
+    this._maxHeat = 1.0;
+    this._maxOpacity = 1.0;
     this._data = [];
 }
 
@@ -119,13 +121,21 @@ simpleheat.prototype = {
     },
 
     _colorize: function (pixels, gradient) {
+	var _maxHeat = this._maxHeat || 1.0;
+	if(_maxHeat <=0 || _maxHeat > 1){
+	    _maxHeat = 1.0;
+	}
+	var _maxOpacity = this._maxOpacity || 1.0;
         for (var i = 0, len = pixels.length, j; i < len; i += 4) {
-            j = pixels[i + 3] * 4; // get gradient color from opacity value
+	    // get gradient color from opacity value
+	    var opacity = parseInt(Math.min(pixels[i + 3] / _maxHeat, 255));
+            j = opacity * 4; 
 
             if (j) {
                 pixels[i] = gradient[j];
                 pixels[i + 1] = gradient[j + 1];
                 pixels[i + 2] = gradient[j + 2];
+		pixels[i + 3] = opacity * _maxOpacity;
             }
         }
     },
