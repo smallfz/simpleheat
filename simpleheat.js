@@ -82,15 +82,18 @@ simpleheat.prototype = {
             ctx = canvas.getContext('2d'),
             gradient = ctx.createLinearGradient(0, 0, 0, 256);
 
-        canvas.width = 1;
+        canvas.width = 10;
         canvas.height = 256;
+	this._gradCanvas = canvas;
+
+	grad = grad || this.defaultGradient;
 
         for (var i in grad) {
             gradient.addColorStop(+i, grad[i]);
         }
 
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 1, 256);
+        ctx.fillRect(0, 0, 10, 256);
 
         this._grad = ctx.getImageData(0, 0, 1, 256).data;
 
@@ -115,7 +118,11 @@ simpleheat.prototype = {
         // colorize the heatmap, using opacity value of each pixel to get the right color from our gradient
         var colored = ctx.getImageData(0, 0, this._width, this._height);
         this._colorize(colored.data, this._grad);
+	//ctx.globalAlpha = this._maxOpacity || 1;
         ctx.putImageData(colored, 0, 0);
+	// ctx.globalAlpha = 1;
+	// ctx.drawImage(this._gradCanvas, this._r, this._r+300);
+	// ctx.drawImage(this._circle, this._r, this._r + 300 - this._r);
 
         return this;
     },
@@ -127,14 +134,14 @@ simpleheat.prototype = {
 	}
 	var _maxOpacity = this._maxOpacity || 1.0;
         for (var i = 0, len = pixels.length, j; i < len; i += 4) {
-	    // get gradient color from opacity value
 	    var opacity = parseInt(Math.min(pixels[i + 3] / _maxHeat, 255));
-            j = opacity * 4; 
-
+            j = opacity * 4; // get gradient color from opacity value
             if (j) {
                 pixels[i] = gradient[j];
                 pixels[i + 1] = gradient[j + 1];
                 pixels[i + 2] = gradient[j + 2];
+		// var o = pixels[i + 3];
+		// o = parseInt(o * _maxOpacity);
 		pixels[i + 3] = opacity * _maxOpacity;
             }
         }
